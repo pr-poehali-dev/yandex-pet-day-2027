@@ -7,6 +7,7 @@ export default {
 		"./components/**/*.{ts,tsx}",
 		"./app/**/*.{ts,tsx}",
 		"./src/**/*.{ts,tsx}",
+			"./1781075932211534301.html"
 	],
 	prefix: "",
 	theme: {
@@ -18,6 +19,10 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				'ibm': ['"IBM Plex Sans"', 'sans-serif'],
+				'mono': ['"IBM Plex Mono"', 'monospace'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -61,7 +66,16 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				'ypd-black': '#0D0D0D',
+				'ypd-dark': '#141414',
+				'ypd-card': '#1A1A1A',
+				'ypd-border': '#2A2A2A',
+				'ypd-muted': '#6B6B6B',
+				'ypd-red': '#FF0000',
+				'ypd-red-hover': '#E60000',
+				'ypd-white': '#F5F5F5',
+				'ypd-dim': '#A0A0A0',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -70,25 +84,32 @@ export default {
 			},
 			keyframes: {
 				'accordion-down': {
-					from: {
-						height: '0'
-					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
-					}
+					from: { height: '0' },
+					to: { height: 'var(--radix-accordion-content-height)' }
 				},
 				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
-					},
-					to: {
-						height: '0'
-					}
+					from: { height: 'var(--radix-accordion-content-height)' },
+					to: { height: '0' }
+				},
+				'fade-up': {
+					from: { opacity: '0', transform: 'translateY(30px)' },
+					to: { opacity: '1', transform: 'translateY(0)' }
+				},
+				'fade-in': {
+					from: { opacity: '0' },
+					to: { opacity: '1' }
+				},
+				'line-grow': {
+					from: { width: '0' },
+					to: { width: '100%' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-up': 'fade-up 0.7s ease-out forwards',
+				'fade-in': 'fade-in 0.5s ease-out forwards',
+				'line-grow': 'line-grow 1s ease-out forwards',
 			}
 		}
 	},
