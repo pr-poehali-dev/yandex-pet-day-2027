@@ -197,6 +197,36 @@ function Reveal({
   );
 }
 
+function FaqItem({ index, question, answer }: { index: number; question: string; answer: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div
+      className="border border-ypd-border rounded-xl overflow-hidden bg-ypd-dark cursor-pointer hover:border-ypd-muted transition-colors duration-200"
+      onClick={() => setOpen((o) => !o)}
+    >
+      <div className="flex items-center justify-between gap-4 px-6 py-5">
+        <div className="flex items-center gap-4">
+          <span className="font-mono text-xs text-ypd-red w-5 shrink-0">{String(index).padStart(2, "0")}</span>
+          <span className="text-sm font-medium text-ypd-white leading-snug">{question}</span>
+        </div>
+        <span
+          className="text-ypd-muted shrink-0 transition-transform duration-200"
+          style={{ transform: open ? "rotate(45deg)" : "rotate(0deg)" }}
+        >
+          +
+        </span>
+      </div>
+      {open && (
+        <div className="px-6 pb-5 pt-0">
+          <div className="border-t border-ypd-border pt-4">
+            <p className="text-sm text-ypd-dim leading-relaxed whitespace-pre-line">{answer}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Index() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", company: "", format: "offline" });
   const [submitted, setSubmitted] = useState(false);
@@ -663,6 +693,62 @@ export default function Index() {
                   <p className="text-xs text-ypd-dim leading-snug">{item.label}</p>
                 </div>
               </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-24 border-t border-ypd-border">
+        <div className="max-w-7xl mx-auto px-6">
+          <Reveal>
+            <span className="font-mono text-xs text-ypd-red uppercase tracking-widest">FAQ</span>
+            <h2 className="text-3xl sm:text-4xl font-bold mt-3 mb-12">Часто задаваемые вопросы</h2>
+          </Reveal>
+          <div className="grid lg:grid-cols-2 gap-4">
+            {[
+              {
+                q: "Нужно ли платить за участие?",
+                a: "Участие в конференции бесплатное. Требуется только предварительная регистрация.",
+              },
+              {
+                q: "Где будет проходить конференция?",
+                a: "Мероприятие проходит в гибридном формате:\n— Офлайн: Москва, Цифровое деловое пространство «Новатор»\n— Онлайн: прямая трансляция (ссылка придёт на почту после регистрации)",
+              },
+              {
+                q: "Нужна ли предварительная регистрация на офлайн?",
+                a: "Да, количество мест ограничено. После регистрации вы получите подтверждение на email.",
+              },
+              {
+                q: "Будет ли запись выступлений?",
+                a: "Да. Онлайн-участники получат доступ к записи всех докладов после конференции. Офлайн-участники — тоже.",
+              },
+              {
+                q: "Можно ли сменить формат участия (офлайн → онлайн)?",
+                a: "Да, но не позднее чем за 3 дня до конференции. Для этого нужно написать на почту организаторам.",
+              },
+              {
+                q: "Будут ли раздаточные материалы?",
+                a: "Офлайн-участникам — бейджи, кофе-брейк и нетворкинг. Электронные презентации спикеров получат все зарегистрированные участники.",
+              },
+              {
+                q: "Подходит ли конференция для новичков в pet-индустрии?",
+                a: "Да. Программа рассчитана как на экспертов, так и на тех, кто только начинает путь в pet-технологиях, дизайне и digital-продуктах.",
+              },
+              {
+                q: "Будут ли спикеры отвечать на вопросы?",
+                a: "Да. После каждого доклада предусмотрено время для Q&A. Также можно задать вопросы в чате онлайн-трансляции.",
+              },
+              {
+                q: "Как получить ссылку на трансляцию?",
+                a: "После регистрации придёт письмо с подтверждением. За день до конференции мы вышлем персональную ссылку на онлайн-трансляцию.",
+              },
+              {
+                q: "Есть вопрос, которого нет в списке. Куда написать?",
+                a: "Напишите нам: petday@yandex.ru — ответим в течение 24 часов.",
+              },
+            ].map((item, i) => (
+              <FaqItem key={i} index={i + 1} question={item.q} answer={item.a} />
             ))}
           </div>
         </div>
