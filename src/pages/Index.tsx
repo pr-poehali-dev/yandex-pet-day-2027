@@ -197,6 +197,64 @@ function Reveal({
   );
 }
 
+function FaqContactForm() {
+  const [fields, setFields] = useState({ name: "", email: "", message: "" });
+  const [sent, setSent] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSent(true);
+  };
+
+  if (sent) {
+    return (
+      <div className="flex flex-col items-start gap-2 py-4">
+        <span className="font-mono text-xs text-ypd-red uppercase tracking-widest">Отправлено</span>
+        <p className="text-ypd-white font-medium">Спасибо! Ответим в течение 24 часов.</p>
+      </div>
+    );
+  }
+
+  const inputCls = "w-full bg-ypd-black border border-ypd-border rounded-lg px-4 py-3 text-sm text-ypd-white placeholder:text-ypd-dim focus:outline-none focus:border-ypd-muted transition-colors duration-200";
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <div className="grid sm:grid-cols-2 gap-3">
+        <input
+          required
+          type="text"
+          placeholder="Имя"
+          className={inputCls}
+          value={fields.name}
+          onChange={(e) => setFields({ ...fields, name: e.target.value })}
+        />
+        <input
+          required
+          type="email"
+          placeholder="Почта"
+          className={inputCls}
+          value={fields.email}
+          onChange={(e) => setFields({ ...fields, email: e.target.value })}
+        />
+      </div>
+      <textarea
+        required
+        rows={4}
+        placeholder="Опишите ваш вопрос"
+        className={inputCls + " resize-none"}
+        value={fields.message}
+        onChange={(e) => setFields({ ...fields, message: e.target.value })}
+      />
+      <button
+        type="submit"
+        className="self-start px-6 py-3 bg-ypd-red text-ypd-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity duration-200"
+      >
+        Отправить
+      </button>
+    </form>
+  );
+}
+
 function FaqItem({ index, question, answer }: { index: number; question: string; answer: string }) {
   const [open, setOpen] = useState(false);
   return (
@@ -751,6 +809,19 @@ export default function Index() {
               <FaqItem key={i} index={i + 1} question={item.q} answer={item.a} />
             ))}
           </div>
+
+          <Reveal>
+            <div className="mt-16 border border-ypd-border rounded-2xl bg-ypd-dark p-8 lg:p-12">
+              <div className="grid lg:grid-cols-2 gap-10 items-center">
+                <div>
+                  <span className="font-mono text-xs text-ypd-red uppercase tracking-widest">Поддержка</span>
+                  <h3 className="text-2xl sm:text-3xl font-bold mt-3 mb-3">Остались вопросы?</h3>
+                  <p className="text-ypd-dim text-sm leading-relaxed">Напишите нам — ответим в течение 24 часов.</p>
+                </div>
+                <FaqContactForm />
+              </div>
+            </div>
+          </Reveal>
         </div>
       </section>
 
