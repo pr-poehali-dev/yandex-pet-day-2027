@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import Icon from "@/components/ui/icon";
 
-type TooltipData = { x: number; y: number; color: string; size: string; weight: string };
-type ClickPoint = { x: number; y: number; rect: DOMRect };
+type TooltipData = { x: number; y: number; color: string; size: string; weight: string; tag: string };
 
 function toHex(color: string): string {
   const rgb = color.match(/\d+/g);
@@ -24,10 +23,16 @@ function weightLabel(w: string): string {
   return "ExtraBold";
 }
 
+function headingTag(el: HTMLElement): string {
+  const tag = el.tagName.toLowerCase();
+  if (["h1","h2","h3","h4","h5","h6"].includes(tag)) return tag.toUpperCase();
+  const closest = el.closest("h1,h2,h3,h4,h5,h6");
+  if (closest) return closest.tagName.toUpperCase();
+  return "";
+}
+
 function StyleTooltip() {
   const [tooltip, setTooltip] = useState<TooltipData | null>(null);
-  const [firstClick, setFirstClick] = useState<ClickPoint | null>(null);
-  const [distance, setDistance] = useState<{ dx: number; dy: number; x: number; y: number; fx: number; fy: number; tx: number; ty: number } | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -41,40 +46,12 @@ function StyleTooltip() {
       const hex = toHex(style.color);
       const size = Math.round(parseFloat(style.fontSize)) + "px";
       const weight = weightLabel(style.fontWeight);
+      const tag = headingTag(el);
 
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => {
-        setTooltip({ x: e.clientX, y: e.clientY, color: hex, size, weight });
+        setTooltip({ x: e.clientX, y: e.clientY, color: hex, size, weight, tag });
       }, 80);
-    };
-
-    const handleClick = (e: MouseEvent) => {
-      const el = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
-      if (!el) return;
-      const skip = ["HTML", "BODY", "SCRIPT", "STYLE"];
-      if (skip.includes(el.tagName)) return;
-
-      const rect = el.getBoundingClientRect();
-
-      if (!firstClick) {
-        setFirstClick({ x: e.clientX, y: e.clientY, rect });
-        setDistance(null);
-      } else {
-        const dx = Math.round(Math.abs(e.clientX - firstClick.x));
-        const dy = Math.round(Math.abs(e.clientY - firstClick.y));
-        setDistance({
-          dx, dy,
-          x: Math.min(firstClick.x, e.clientX) + dx / 2,
-          y: Math.min(firstClick.y, e.clientY) + dy / 2,
-          fx: firstClick.x, fy: firstClick.y,
-          tx: e.clientX, ty: e.clientY,
-        });
-        setFirstClick(null);
-      }
-    };
-
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") { setFirstClick(null); setDistance(null); }
     };
 
     const handleLeave = () => {
@@ -84,101 +61,44 @@ function StyleTooltip() {
 
     document.addEventListener("mousemove", handleMove);
     document.addEventListener("mouseleave", handleLeave);
-    document.addEventListener("click", handleClick);
-    document.addEventListener("keydown", handleKey);
     return () => {
       document.removeEventListener("mousemove", handleMove);
       document.removeEventListener("mouseleave", handleLeave);
-      document.removeEventListener("click", handleClick);
-      document.removeEventListener("keydown", handleKey);
     };
-  }, [firstClick]);
-
-  const monoStyle: React.CSSProperties = {
-    fontFamily: '"IBM Plex Mono", monospace',
-    fontSize: 11,
-    whiteSpace: "nowrap",
-  };
+  }, []);
 
   const popupBase: React.CSSProperties = {
     background: "#1A1A1A",
     border: "1px solid #2A2A2A",
     borderRadius: 6,
     boxShadow: "0 4px 20px rgba(0,0,0,0.6)",
-    ...monoStyle,
+    fontFamily: '"IBM Plex Mono", monospace',
+    fontSize: 11,
+    whiteSpace: "nowrap",
   };
 
   return (
     <>
-      {/* Hover tooltip */}
       {tooltip && (
         <div
           className="fixed z-[9999] pointer-events-none"
-          style={{ left: tooltip.x + 14, top: tooltip.y - 52 }}
+          style={{ left: tooltip.x + 14, top: tooltip.y - 44 }}
         >
-          <div style={{ ...popupBase, padding: "6px 10px", display: "flex", flexDirection: "column", gap: 4 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ width: 12, height: 12, borderRadius: 2, background: tooltip.color, border: "1px solid #3A3A3A", flexShrink: 0 }} />
-              <span style={{ color: "#F5F5F5" }}>{tooltip.color}</span>
-              <span style={{ color: "#6B6B6B" }}>·</span>
-              <span style={{ color: "#A0A0A0" }}>{tooltip.size}</span>
-              <span style={{ color: "#6B6B6B" }}>·</span>
-              <span style={{ color: "#A0A0A0" }}>{tooltip.weight}</span>
-            </div>
-            <div style={{ color: "#6B6B6B", fontSize: 10 }}>
-              {firstClick ? "🔴 кликни второй элемент" : "клик → измерить расстояние"}
-            </div>
+          <div style={{ ...popupBase, padding: "6px 10px", display: "flex", alignItems: "center", gap: 8 }}>
+            {tooltip.tag && (
+              <>
+                <span style={{ color: "#FF0000", fontWeight: 600 }}>{tooltip.tag}</span>
+                <span style={{ color: "#3A3A3A" }}>|</span>
+              </>
+            )}
+            <span style={{ width: 12, height: 12, borderRadius: 2, background: tooltip.color, border: "1px solid #3A3A3A", flexShrink: 0 }} />
+            <span style={{ color: "#F5F5F5" }}>{tooltip.color}</span>
+            <span style={{ color: "#6B6B6B" }}>·</span>
+            <span style={{ color: "#A0A0A0" }}>{tooltip.size}</span>
+            <span style={{ color: "#6B6B6B" }}>·</span>
+            <span style={{ color: "#A0A0A0" }}>{tooltip.weight}</span>
           </div>
         </div>
-      )}
-
-      {/* First click marker */}
-      {firstClick && (
-        <div
-          className="fixed z-[9998] pointer-events-none"
-          style={{
-            left: firstClick.x - 5,
-            top: firstClick.y - 5,
-            width: 10,
-            height: 10,
-            borderRadius: "50%",
-            background: "#FF0000",
-            boxShadow: "0 0 0 3px rgba(255,0,0,0.3)",
-          }}
-        />
-      )}
-
-      {/* Distance overlay */}
-      {distance && (
-        <>
-          <svg
-            className="fixed inset-0 z-[9997] pointer-events-none"
-            style={{ width: "100vw", height: "100vh" }}
-          >
-            <line
-              x1={distance.fx} y1={distance.fy}
-              x2={distance.tx} y2={distance.ty}
-              stroke="#FF0000" strokeWidth={1} strokeDasharray="4 3" opacity={0.7}
-            />
-            <circle cx={distance.fx} cy={distance.fy} r={4} fill="#FF0000" opacity={0.8} />
-            <circle cx={distance.tx} cy={distance.ty} r={4} fill="#FF0000" opacity={0.8} />
-          </svg>
-          <div
-            className="fixed z-[9999] pointer-events-none"
-            style={{ left: distance.x + 8, top: distance.y - 36 }}
-          >
-            <div style={{ ...popupBase, padding: "6px 10px", display: "flex", flexDirection: "column", gap: 3 }}>
-              <div style={{ display: "flex", gap: 8, color: "#F5F5F5" }}>
-                <span>↔ {distance.dx}px</span>
-                <span style={{ color: "#6B6B6B" }}>·</span>
-                <span>↕ {distance.dy}px</span>
-              </div>
-              <div style={{ color: "#6B6B6B", fontSize: 10 }}>
-                diagonal {Math.round(Math.sqrt(distance.dx ** 2 + distance.dy ** 2))}px · Esc сбросить
-              </div>
-            </div>
-          </div>
-        </>
       )}
     </>
   );
