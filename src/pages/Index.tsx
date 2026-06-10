@@ -1,6 +1,93 @@
 import { useState, useEffect, useRef } from "react";
 import Icon from "@/components/ui/icon";
 
+function StyleTooltip() {
+  const [tooltip, setTooltip] = useState<{ x: number; y: number; color: string; size: string } | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const handleMove = (e: MouseEvent) => {
+      const el = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
+      if (!el) return;
+
+      const skip = ["HTML", "BODY", "SCRIPT", "STYLE", "SVG", "PATH"];
+      if (skip.includes(el.tagName)) { setTooltip(null); return; }
+
+      const style = window.getComputedStyle(el);
+      const color = style.color;
+      const size = Math.round(parseFloat(style.fontSize)) + "px";
+
+      const rgb = color.match(/\d+/g);
+      let hex = color;
+      if (rgb && rgb.length >= 3) {
+        hex = "#" + [rgb[0], rgb[1], rgb[2]]
+          .map((v) => parseInt(v).toString(16).padStart(2, "0"))
+          .join("").toUpperCase();
+      }
+
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
+        setTooltip({ x: e.clientX, y: e.clientY, color: hex, size });
+      }, 120);
+    };
+
+    const handleLeave = () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      setTooltip(null);
+    };
+
+    document.addEventListener("mousemove", handleMove);
+    document.addEventListener("mouseleave", handleLeave);
+    return () => {
+      document.removeEventListener("mousemove", handleMove);
+      document.removeEventListener("mouseleave", handleLeave);
+    };
+  }, []);
+
+  if (!tooltip) return null;
+
+  const left = tooltip.x + 14;
+  const top = tooltip.y - 44;
+
+  return (
+    <div
+      className="fixed z-[9999] pointer-events-none"
+      style={{ left, top }}
+    >
+      <div
+        style={{
+          background: "#1A1A1A",
+          border: "1px solid #2A2A2A",
+          borderRadius: 6,
+          padding: "5px 10px",
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          boxShadow: "0 4px 16px rgba(0,0,0,0.5)",
+          fontFamily: '"IBM Plex Mono", monospace',
+          fontSize: 11,
+          color: "#A0A0A0",
+          whiteSpace: "nowrap",
+        }}
+      >
+        <span
+          style={{
+            width: 12,
+            height: 12,
+            borderRadius: 2,
+            background: tooltip.color,
+            border: "1px solid #3A3A3A",
+            flexShrink: 0,
+          }}
+        />
+        <span style={{ color: "#F5F5F5" }}>{tooltip.color}</span>
+        <span style={{ color: "#6B6B6B" }}>·</span>
+        <span>{tooltip.size}</span>
+      </div>
+    </div>
+  );
+}
+
 const SPEAKERS = [
   {
     name: "Андрей Неколов",
@@ -126,6 +213,7 @@ export default function Index() {
 
   return (
     <div className="font-ibm bg-ypd-black text-ypd-white min-h-screen">
+      <StyleTooltip />
 
       {/* HEADER */}
       <header
